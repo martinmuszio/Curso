@@ -1,69 +1,97 @@
 #include <Arduino.h>
-#include <Servo.h>
 
-Servo myservo;
-#define PIN_ECHO      A0  // Pin ECHO conectado a A0
-#define PIN_TRIGGER   A1  // Pin TRIGGER conectado a PIN A1
-#define PIN_SERVO     A2  // Pin del servo conectado a PIN A2
+#define PIN_298ENA  5   // ENA (enable A) conectado a PIN 5
+#define PIN_298ENB  6   // ENB (enable B) conectado a PIN 6
+#define PIN_298IN1  9   // IN1 del L298, conectado a PIN 9
+#define PIN_298IN2  4   // IN2 del L298, conectado a PIN 4
+#define PIN_298IN3  7   // IN3 del L298, conectado a PIN 7 
+#define PIN_298IN4  8   // IN4 del L298, Rigth Forward, conectado a PIN 8
 
-
-volatile int distancia_frontal;
-volatile int distancia_izquierda;
-volatile int distancia_derecha;
-
-/* Funcion distancia: calcula la distancia del sensor ultrasonico */
-float distancia() {
-  digitalWrite(PIN_TRIGGER, LOW);
-  delayMicroseconds(2);
-  digitalWrite(PIN_TRIGGER, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(PIN_TRIGGER, LOW);
-  float distance = pulseIn(PIN_ECHO, HIGH) / 58.00;
-  delay(10);
-  return distance;
+/*funcion ir hacia adelante: enciende ambos motores para ir hacia adelante
+* se le pasa por parametro el valor PWM para la velocidad de los motores
+*/
+void ir_adelante(unsigned char speed_val){    // speed_val：0~255
+  digitalWrite(PIN_298IN1,HIGH);
+  digitalWrite(PIN_298IN2,LOW);
+  digitalWrite(PIN_298IN3,HIGH); 
+  digitalWrite(PIN_298IN4,LOW);
+  analogWrite(PIN_298ENA,speed_val);
+  analogWrite(PIN_298ENB,speed_val);
 }
 
-/* Funcion detectar la distancia izquierda y derecha */
-void detecta_distancia(){
+/*funcion ir hacia atras: enciende ambos motores para ir hacia atras
+* se le pasa por parametro el valor PWM para la velocidad de los motores
+*/
+void ir_atras(unsigned char speed_val){    // speed_val：0~255 
+  digitalWrite(PIN_298IN1,LOW);  
+  digitalWrite(PIN_298IN2,HIGH);
+  digitalWrite(PIN_298IN3,LOW);  
+  digitalWrite(PIN_298IN4,HIGH);
+  analogWrite(PIN_298ENA,speed_val);
+  analogWrite(PIN_298ENB,speed_val);
+}
 
-  myservo.write(90);                // Servo al centro
-  delay(500);
-  distancia_frontal = distancia();  // totamos la distancia del frente
-  delay(500);
-  Serial.print("centro: ");         // la enviamos a la PC
-  Serial.print(distancia_frontal);
-  Serial.println(" cm");            // la enviamos a la PC
+/*funcion girar a la izquierda: motor izquierdo para atras y motor derecho para adelante, 
+*se le pasa por parametro el valor PWM para la velocidad de los motores
+*/
+void gira_izquierda(unsigned char speed_val){        // speed_val：0~255
+  digitalWrite(PIN_298IN1,LOW); 
+  digitalWrite(PIN_298IN2,HIGH);
+  digitalWrite(PIN_298IN3,HIGH);
+  digitalWrite(PIN_298IN4,LOW);
+  analogWrite(PIN_298ENA,speed_val);
+  analogWrite(PIN_298ENB,speed_val);
+}
 
-  myservo.write(0);                 // Servo al centro
-  delay(500);
-  distancia_derecha = distancia();  // totamos la distancia del frente
-  delay(500);
-  Serial.print("Derecha: ");        // la enviamos a la PC
-  Serial.print(distancia_derecha);
-  Serial.println(" cm");            // la enviamos a la PC
+/*funcion girar a la derecha: motor izquierdo para adelante y motor derecho para atras, 
+*se le pasa por parametro el valor PWM para la velocidad de los motores
+*/
+void gira_derecha(unsigned char speed_val){    // speed_val：0~255
+  digitalWrite(PIN_298IN1,HIGH);
+  digitalWrite(PIN_298IN2,LOW);  
+  digitalWrite(PIN_298IN3,LOW);  
+  digitalWrite(PIN_298IN4,HIGH);
+  analogWrite(PIN_298ENA,speed_val);
+  analogWrite(PIN_298ENB,speed_val);
+}
 
-  myservo.write(180);               // Servo al centro
-  delay(500);
-  distancia_izquierda = distancia(); // totamos la distancia del frente
-  delay(500);
-  Serial.print("Izquierda: ");        // la enviamos a la PC
-  Serial.print(distancia_izquierda);
-  Serial.println(" cm");              // la enviamos a la PC
-
+/*funcion detener motores: motor izquierdo y derecho para apagados
+* NOTA: no es necesario pasarle por parametro ningun valor
+*/
+void stopp(){        //stop
+  digitalWrite(PIN_298IN1,HIGH);
+  digitalWrite(PIN_298IN2,HIGH);
+  digitalWrite(PIN_298IN3,HIGH);
+  digitalWrite(PIN_298IN4,HIGH);
 }
 
 
 void setup(){
-  myservo.attach(PIN_SERVO);
+
   Serial.begin(9600);
-  distancia_frontal = 0;
-  distancia_izquierda = 0;
-  distancia_derecha = 0;
-  myservo.write(90);
-  pinMode(PIN_ECHO, INPUT);      
-  pinMode(PIN_TRIGGER, OUTPUT);     
+  pinMode(PIN_298IN1,OUTPUT);   // pin 9
+  pinMode(PIN_298IN2,OUTPUT);   // pin 4
+  pinMode(PIN_298IN3,OUTPUT);   // pin 7
+  pinMode(PIN_298IN4,OUTPUT);   // pin 8
+  pinMode(PIN_298ENA,OUTPUT);   // pin 5 (PWM) 
+  pinMode(PIN_298ENB,OUTPUT);   // pin 6(PWM) 
 }
 
 void loop(){
-  detecta_distancia();
+
+  // va a adelante a fondo durante 2 Segundos
+  ir_adelante(255);
+  delay(1000);
+  // gira Izquierda a fondo durante 2 Segundos
+  gira_izquierda(255);
+  delay(1000);
+  // gira Derecha a fondo durante 2 Segundos
+  gira_derecha(255);
+  delay(1000);
+  // Marcha atras a fondo durante 2 Segundos
+  ir_atras(255);
+  delay(1000);
+  // Para 5 Segundos
+  stopp();
+  delay(5000);
 }
