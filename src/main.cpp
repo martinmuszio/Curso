@@ -1,4 +1,3 @@
-//Interrupciones clase 10
 #include <Arduino.h>
 
 #define PIN_298ENA  5   // ENA (enable A) conectado a PIN 5
