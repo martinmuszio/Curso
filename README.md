@@ -1,2 +1,2 @@
 # Curso Robotica.
-Clase 1, Led parpadeante, Conceptos basicos de Funciones
+Clase 6, SERVO SG90: Interpretacion, Manejo y uso CON LIBRERIA
