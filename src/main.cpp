@@ -7,52 +7,74 @@
 #define PIN_298IN3  7   // IN3 del L298, conectado a PIN 7 
 #define PIN_298IN4  8   // IN4 del L298, Rigth Forward, conectado a PIN 8
 
+/*  FUNCION PWM entre 0 y 100
+*   la siguiente funcion, convierte valores entre 0 100
+*   que puede ser float, a valores tipo byte, que puede
+*   ser util por ejemplo para utilizar con analogWrite()
+*   de esta forma, podriamos pasar por parametro de la
+*   siguiente forma: analogWrite(pwm_0a100(variable_float))
+*   la funcion devuelve un byte (0-255) dependiendo el valor
+*   float de entrada. Si variable_float es menor o igual a 0 
+*   devuelve 0, si es mayor o igual que 100, devuelve 255
+*   y si esta entre esos valores, multiplica por 2.55*/
+byte pwm_0a100(float valor){
+  if(valor >= 100){
+    return 255;                   // si valor es mayor o igual que 100, simplemente devuelve 255
+  }else{
+    if(valor <= 0){
+      return 0;                   // si valor es menor o igual a 0, devuelve 0
+    }else{
+      return byte(valor * 2.55);  // sino devuelve el byte de la multiplicacion de valor x 2.55
+    }
+  }
+}
+
 /*funcion ir hacia adelante: enciende ambos motores para ir hacia adelante
 * se le pasa por parametro el valor PWM para la velocidad de los motores
 */
-void ir_adelante(unsigned char speed_val){    // speed_val：0~255
+void ir_adelante(float speed_val){    // speed_val：0~255
   digitalWrite(PIN_298IN1,HIGH);
   digitalWrite(PIN_298IN2,LOW);
   digitalWrite(PIN_298IN3,HIGH); 
   digitalWrite(PIN_298IN4,LOW);
-  analogWrite(PIN_298ENA,speed_val);
-  analogWrite(PIN_298ENB,speed_val);
+  analogWrite(PIN_298ENA, pwm_0a100(speed_val));
+  analogWrite(PIN_298ENB, pwm_0a100(speed_val));
 }
 
 /*funcion ir hacia atras: enciende ambos motores para ir hacia atras
 * se le pasa por parametro el valor PWM para la velocidad de los motores
 */
-void ir_atras(unsigned char speed_val){    // speed_val：0~255 
+void ir_atras(float speed_val){    // speed_val：0~255 
   digitalWrite(PIN_298IN1,LOW);  
   digitalWrite(PIN_298IN2,HIGH);
   digitalWrite(PIN_298IN3,LOW);  
   digitalWrite(PIN_298IN4,HIGH);
-  analogWrite(PIN_298ENA,speed_val);
-  analogWrite(PIN_298ENB,speed_val);
+  analogWrite(PIN_298ENA, pwm_0a100(speed_val));
+  analogWrite(PIN_298ENB, pwm_0a100(speed_val));
 }
 
 /*funcion girar a la izquierda: motor izquierdo para atras y motor derecho para adelante, 
 *se le pasa por parametro el valor PWM para la velocidad de los motores
 */
-void gira_izquierda(unsigned char speed_val){        // speed_val：0~255
+void gira_izquierda(float speed_val){        // speed_val：0~255
   digitalWrite(PIN_298IN1,LOW); 
   digitalWrite(PIN_298IN2,HIGH);
   digitalWrite(PIN_298IN3,HIGH);
   digitalWrite(PIN_298IN4,LOW);
-  analogWrite(PIN_298ENA,speed_val);
-  analogWrite(PIN_298ENB,speed_val);
+  analogWrite(PIN_298ENA, pwm_0a100(speed_val));
+  analogWrite(PIN_298ENB, pwm_0a100(speed_val));
 }
 
 /*funcion girar a la derecha: motor izquierdo para adelante y motor derecho para atras, 
 *se le pasa por parametro el valor PWM para la velocidad de los motores
 */
-void gira_derecha(unsigned char speed_val){    // speed_val：0~255
+void gira_derecha(float speed_val){    // speed_val：0~255
   digitalWrite(PIN_298IN1,HIGH);
   digitalWrite(PIN_298IN2,LOW);  
   digitalWrite(PIN_298IN3,LOW);  
   digitalWrite(PIN_298IN4,HIGH);
-  analogWrite(PIN_298ENA,speed_val);
-  analogWrite(PIN_298ENB,speed_val);
+  analogWrite(PIN_298ENA, pwm_0a100(speed_val));
+  analogWrite(PIN_298ENB, pwm_0a100(speed_val));
 }
 
 /*funcion detener motores: motor izquierdo y derecho para apagados
@@ -80,16 +102,16 @@ void setup(){
 void loop(){
 
   // va a adelante a fondo durante 2 Segundos
-  ir_adelante(255);
+  ir_adelante(80);
   delay(1000);
   // gira Izquierda a fondo durante 2 Segundos
-  gira_izquierda(255);
+  gira_izquierda(80);
   delay(1000);
   // gira Derecha a fondo durante 2 Segundos
-  gira_derecha(255);
+  gira_derecha(80);
   delay(1000);
   // Marcha atras a fondo durante 2 Segundos
-  ir_atras(255);
+  ir_atras(80);
   delay(1000);
   // Para 5 Segundos
   stopp();
