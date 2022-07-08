@@ -1,2 +1,2 @@
 # Curso Robotica.
-Clase 10, Interrupciones
+Clase 11, Tacometro con interrupciones
