@@ -58,7 +58,7 @@ void loop(){
     Serial.println(rpm);
     /*
     sprintf (buffer, "Velocidad: %4d RPM\r",rpm);
-    Serial.print(buffer);
+    Serial.print(buffer); explicar completamente 
   */
 
     // una vez mostrada la variable, reestablezco el contador
