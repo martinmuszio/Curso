@@ -1,4 +1,11 @@
 #include <Arduino.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27,16,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
+
+
+
+
 
 /* Para Tacometro*/
 float contador = 0; // guardamos la cuenta de giros
@@ -6,9 +13,13 @@ int rpm = 0;        // el valor de rpm
 long ahora = 0;     // tiempo actual
 long antes = 0;     // tiempo pasado
 
-char buffer[20];
+#define uso_sprintf
 
-// Funcion Interrpcion, solo aumenta la variable contador
+#ifdef uso_sprintf
+char buffer[20];
+#endif
+
+// Funcion Interrupcion, solo aumenta la variable contador
 // es llamada en caso que attachInterrupt(pin, isr, modo) ocurra
 // para nuestro caso, solo aumenta la variable contador
 void isr(){ //interrupt service routine
@@ -49,17 +60,16 @@ void loop(){
 
     // a continuacion, simplemente mostraremos las RPM
     // en la pantalla
-    /*
+
+    #ifndef uso_sprintf
     Serial.print("Velocidad: ");
     Serial.print(rpm);
     Serial.print(" RPM");
     Serial.print("\r");
-*/
-    Serial.println(rpm);
-    /*
+    #else
     sprintf (buffer, "Velocidad: %4d RPM\r",rpm);
-    Serial.print(buffer); explicar completamente 
-  */
+    Serial.print(buffer); //explicar completamente 
+    #endif
 
     // una vez mostrada la variable, reestablezco el contador
     // para que empiece a contar nuevamente de 0.
