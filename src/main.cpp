@@ -47,6 +47,12 @@ void loop(){
     // debera dividir por 2. 
     rpm = contador * 60 / 2;
 
+    if(rpm > 0){
+      lcd.backlight();
+    }else{
+      lcd.noBacklight();
+    }
+
     // a continuacion, simplemente mostraremos las RPM
     // en la pantalla
     lcd.clear();
