@@ -9,12 +9,6 @@ int rpm = 0;        // el valor de rpm
 long ahora = 0;     // tiempo actual
 long antes = 0;     // tiempo pasado
 
-#define uso_sprintf
-
-#ifdef uso_sprintf
-char buffer[4];
-#endif
-
 // Funcion Interrupcion, solo aumenta la variable contador
 // es llamada en caso que attachInterrupt(pin, isr, modo) ocurra
 // para nuestro caso, solo aumenta la variable contador
@@ -33,10 +27,6 @@ void setup(){
   // ocurra, y el modo en que lo va a hacer, en este caso, puede ser Falling o rising
   pinMode(2,INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(2), isr, FALLING);
-
-  lcd.setCursor(0,0);
-  lcd.print("TACOMETRO:");
-
 }
 
 void loop(){
@@ -59,7 +49,10 @@ void loop(){
 
     // a continuacion, simplemente mostraremos las RPM
     // en la pantalla
-    lcd.setCursor(9,0);
+    lcd.clear();
+    //lcd.setCursor(0,0);
+    lcd.print("TACOMETRO: ");
+    //lcd.setCursor(10,0);
     lcd.print(rpm);
     // una vez mostrada la variable, reestablezco el contador
     // para que empiece a contar nuevamente de 0.
