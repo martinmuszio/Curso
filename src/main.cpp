@@ -103,8 +103,8 @@ void stopp(){        //stop
 */
 void deteccion_colision(){
 
-  distancia_frontal=distancia(); // calcula la distancia
-  if((distancia_frontal < D_min) && (distancia_frontal > 0)){ // si la distancia frontal esta entre 0 y D_min 
+  distancia_frontal = distancia(); // calcula la distancia
+  if((distancia_frontal > 0) && (distancia_frontal < D_min)){ // si la distancia frontal esta entre 0 y D_min 
     stopp();  //frena los motores
     delay(100);
     f_servo.write(180); // mira a la izquierda, gira el servo 180°
