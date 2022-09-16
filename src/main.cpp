@@ -15,6 +15,9 @@ LiquidCrystal_I2C lcd(0x27,16,2);
 #define PIN_298IN3  7   // IN3 del L298, conectado a PIN 7 
 #define PIN_298IN4  8   // IN4 del L298, conectado a PIN 8
 
+#define servo_izquierda f_servo.write(180)  // Servo Izquierda
+#define servo_derecha   f_servo.write(0);   // Servo Derecha
+#define servo_frontal   f_servo.write(90);  // Servo Frontal
 
 volatile float D_min = 30;
 volatile float distancia_frontal;
