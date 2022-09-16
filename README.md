@@ -1,2 +1,2 @@
 # Curso Robotica.
-Clase 11, Tacometro con interrupciones
+Clase 13, ROBOT ENTERO
