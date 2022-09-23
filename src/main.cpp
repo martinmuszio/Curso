@@ -27,6 +27,18 @@ volatile float distancia_derecha;
 volatile int vel_izq = 145;
 volatile int vel_der = 125;
 
+volatile int ac_izquierdo;
+volatile int ac_derecho;
+
+/* Interrupcion Externa, ENCODER IZQUIERDO PIN3*/
+void isr_motor_izquierdo(){ //interrupt service routine
+  ac_izquierdo ++;
+}
+
+/* Interrupcion Externa, ENCODER DERECHO PIN2*/
+void isr_motor_derecho(){ //interrupt service routine
+  ac_derecho ++;
+}
 
 /* Funcion distancia: calcula la distancia del sensor ultrasonico */
 float distancia() {
@@ -131,14 +143,20 @@ void deteccion_colision(){
     ir_adelante(vel_izq, vel_der);  //va hacia adelante
   }
 
+  // lcd.setCursor(0, 0);
+  // lcd.print("L:");
+  // lcd.print(distancia_izquierda);
+  // lcd.print(" R:");
+  // lcd.print(distancia_derecha);
+  // lcd.setCursor(0, 1);
+  // lcd.print("   F:");
+  // lcd.print(distancia_frontal);
   lcd.setCursor(0, 0);
   lcd.print("L:");
-  lcd.print(distancia_izquierda);
-  lcd.print(" R:");
-  lcd.print(distancia_derecha);
-  lcd.setCursor(0, 1);
-  lcd.print("   F:");
-  lcd.print(distancia_frontal);
+  lcd.print(ac_izquierdo);
+  lcd.setCursor(0, 7);
+  lcd.print("R:");
+  lcd.print(ac_derecho);
 }
 
 void setup(){
@@ -156,17 +174,46 @@ void setup(){
   pinMode(PIN_298IN4,OUTPUT);   // pin 8
   pinMode(PIN_298ENA,OUTPUT);   // pin 5 (PWM) 
   pinMode(PIN_298ENB,OUTPUT);   // pin 6(PWM)
+  pinMode(2,INPUT_PULLUP);      // PIN 2 Interrpcion Rueda Derecha
+  pinMode(3,INPUT_PULLUP);      // PIN 3 Interrpcion Rueda Izquierda
 
   lcd.init();
   lcd.backlight();
-  lcd.setCursor(1,0);
-  lcd.print("CURSO ROBOTICA");
-  lcd.setCursor(3,1);
-  lcd.print("   CLASE 13    ");
+  // lcd.setCursor(1,0);
+  // lcd.print("CURSO ROBOTICA");
+  // lcd.setCursor(3,1);
+  // lcd.print("   CLASE 13    ");
   
-  delay(3000);
+  //delay(3000);
+  attachInterrupt(digitalPinToInterrupt(2), isr_motor_derecho, FALLING);
+  attachInterrupt(digitalPinToInterrupt(3), isr_motor_izquierdo, FALLING);
 }
+
+int rpm = 0;        // el valor de rpm
+long ahora = 0;     // tiempo actual
+long antes = 0;     // tiempo pasado
+float hz_izquierda = 0;
+float hz_derecha = 0;
 
 void loop(){
   deteccion_colision();
-}
+  // // guardamos el tiempo actual en la variable ahora
+  // ahora = millis();
+  // ir_adelante(130, 130);
+  // if((ahora - antes) >= 1000 ){
+  //   // en ese caso, actualizo el tiempo:
+  //   antes = ahora;
+  //   // calculo las RPM, la cual sera el producto de 
+  //   // contador por 60 segundos, y en el caso de nuestro
+  //   // ventilador, el fabricante nos indica que por cada
+  //   // revolucion, la salida son 2 pulsos, por lo que se
+  //   // debera dividir por 2. 
+  //   lcd.setCursor(0, 0);
+  //   lcd.print("L:");
+  //   lcd.print(ac_izquierdo);
+  //   lcd.setCursor(0, 1);
+  //   lcd.print("R:");
+  //   lcd.print(ac_derecho);
+  //   ac_izquierdo = 0;
+  //   ac_derecho = 0;
+  }
