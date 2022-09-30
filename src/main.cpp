@@ -19,16 +19,25 @@ LiquidCrystal_I2C lcd(0x27,16,2);
 #define servo_derecha   f_servo.write(0);   // Servo Derecha
 #define servo_frontal   f_servo.write(90);  // Servo Frontal
 
-volatile float D_min = 30;
-volatile float distancia_frontal;
-volatile float distancia_izquierda;
-volatile float distancia_derecha;
+const int D_min = 30; // distancia minima
+const int delay_giro = 400;
+const int delay_atras = 500;
+const int delay_servo = 400;
+const int delay_wat = 0;
+float distancia_frontal;
+float distancia_izquierda;
+float distancia_derecha;
 
-volatile int vel_izq = 145;
-volatile int vel_der = 125;
+long ahora = 0;     // tiempo actual
+long antes = 0;     // tiempo pasado
+
+int vel_izq = 110;
+int vel_der = 100;
 
 volatile int ac_izquierdo;
 volatile int ac_derecho;
+
+
 
 /* Interrupcion Externa, ENCODER IZQUIERDO PIN3*/
 void isr_motor_izquierdo(){ //interrupt service routine
@@ -121,51 +130,38 @@ void deteccion_colision(){
   distancia_frontal = distancia(); // calcula la distancia
   if((distancia_frontal > 0) && (distancia_frontal < D_min)){ // si la distancia frontal esta entre 0 y D_min 
     stopp();  //frena los motores
-    delay(100);
-    f_servo.write(180); // mira a la izquierda, gira el servo 180°
-    delay(500);
+    delay(delay_wat);
+    servo_izquierda; // mira a la izquierda, gira el servo 180°
+    delay(delay_servo);
     distancia_izquierda = distancia();  //mide la distancia izquierda
-    delay(100);
-    f_servo.write(0); // mira a la derecha, gira el servo 180°
-    delay(500);
+    delay(delay_wat);
+    servo_derecha; // mira a la derecha, gira el servo 180°
+    delay(delay_servo);
     distancia_derecha = distancia();  //mide la distancia Derecha
-    delay(100);
-    if(distancia_izquierda > distancia_derecha){  //si la distancia izquierda es mayor a la derecha
-      gira_izquierda(vel_izq, vel_der);   // Gira hacia la izquierda
-      f_servo.write(90);  // vuelva a poner el ultrasonico en el centro
-      delay(150); 
-    }else{ // si la distancia izquierda es menor o igual a la derecha,
-      gira_derecha(vel_izq, vel_der);  // gira a la derecha
-      f_servo.write(90);  // vuelva a poner el ultrasonico en el centro
-      delay(150);
+    delay(delay_wat);
+    
+    if((distancia_derecha < D_min) && (distancia_izquierda < D_min)){
+      // en este caso, ambos extremos estan demasiado cerca... debera ir para atras.
+      ir_atras(vel_izq, vel_der);
+      delay(delay_atras);
+    }else{
+      if(distancia_izquierda > distancia_derecha){  //si la distancia izquierda es mayor a la derecha
+        gira_izquierda(vel_izq, vel_der);   // Gira hacia la izquierda
+        servo_frontal;  // vuelva a poner el ultrasonico en el centro
+        delay(delay_giro); 
+      }else{ // si la distancia izquierda es menor o igual a la derecha,
+        gira_derecha(vel_izq, vel_der);  // gira a la derecha
+        servo_frontal;  // vuelva a poner el ultrasonico en el centro
+        delay(delay_giro);
+      }
     }
   }else{  // si la distancia no esta entre 0 y 20...
     ir_adelante(vel_izq, vel_der);  //va hacia adelante
   }
-
-  // lcd.setCursor(0, 0);
-  // lcd.print("L:");
-  // lcd.print(distancia_izquierda);
-  // lcd.print(" R:");
-  // lcd.print(distancia_derecha);
-  // lcd.setCursor(0, 1);
-  // lcd.print("   F:");
-  // lcd.print(distancia_frontal);
-  lcd.setCursor(0, 0);
-  lcd.print("L:");
-  lcd.print(ac_izquierdo);
-  lcd.setCursor(0, 7);
-  lcd.print("R:");
-  lcd.print(ac_derecho);
 }
 
 void setup(){
-  f_servo.attach(PIN_SERVO);
-  Serial.begin(9600);
-  distancia_frontal = 0;
-  distancia_izquierda = 0;
-  distancia_derecha = 0;
-  f_servo.write(90);
+
   pinMode(PIN_ECHO, INPUT);      
   pinMode(PIN_TRIGGER, OUTPUT);    
   pinMode(PIN_298IN1,OUTPUT);   //pin 9
@@ -176,44 +172,37 @@ void setup(){
   pinMode(PIN_298ENB,OUTPUT);   // pin 6(PWM)
   pinMode(2,INPUT_PULLUP);      // PIN 2 Interrpcion Rueda Derecha
   pinMode(3,INPUT_PULLUP);      // PIN 3 Interrpcion Rueda Izquierda
-
+  f_servo.attach(PIN_SERVO);
+  servo_frontal;
   lcd.init();
   lcd.backlight();
-  // lcd.setCursor(1,0);
-  // lcd.print("CURSO ROBOTICA");
-  // lcd.setCursor(3,1);
-  // lcd.print("   CLASE 13    ");
-  
-  //delay(3000);
+
   attachInterrupt(digitalPinToInterrupt(2), isr_motor_derecho, FALLING);
   attachInterrupt(digitalPinToInterrupt(3), isr_motor_izquierdo, FALLING);
 }
 
-int rpm = 0;        // el valor de rpm
-long ahora = 0;     // tiempo actual
-long antes = 0;     // tiempo pasado
-float hz_izquierda = 0;
-float hz_derecha = 0;
-
 void loop(){
   deteccion_colision();
-  // // guardamos el tiempo actual en la variable ahora
-  // ahora = millis();
-  // ir_adelante(130, 130);
-  // if((ahora - antes) >= 1000 ){
-  //   // en ese caso, actualizo el tiempo:
-  //   antes = ahora;
-  //   // calculo las RPM, la cual sera el producto de 
-  //   // contador por 60 segundos, y en el caso de nuestro
-  //   // ventilador, el fabricante nos indica que por cada
-  //   // revolucion, la salida son 2 pulsos, por lo que se
-  //   // debera dividir por 2. 
-  //   lcd.setCursor(0, 0);
-  //   lcd.print("L:");
-  //   lcd.print(ac_izquierdo);
-  //   lcd.setCursor(0, 1);
-  //   lcd.print("R:");
-  //   lcd.print(ac_derecho);
-  //   ac_izquierdo = 0;
-  //   ac_derecho = 0;
+  // guardamos el tiempo actual en la variable ahora
+  ahora = millis();
+  if((ahora - antes) >= 1000 ){
+    antes = ahora;
+
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(ac_izquierdo);
+    lcd.setCursor(0, 1);
+    lcd.print(distancia_izquierda);
+
+    lcd.setCursor(5, 0);
+    lcd.print(distancia_frontal);
+
+    lcd.setCursor(14, 0);
+    lcd.print(ac_izquierdo);
+    lcd.setCursor(10, 1);
+    lcd.print(distancia_derecha);
+
+    ac_izquierdo = 0;  //  reset counter to zero
+    ac_derecho = 0;  //  reset counter to zero
   }
+}
